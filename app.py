@@ -49,7 +49,14 @@ col4.metric("Current Price (USD)", f"${df['price'].iloc[0]:,.2f}")
 tab1, tab2 = st.tabs(["Data", "Charts"])
 
 with tab1:
-    st.dataframe(df, use_container_width=True)
+    # Format token amounts for display
+    df_display = df.copy()
+    df_display["amount0_usdc"] = df["amount0_usdc"].apply(lambda x: f"{x:,.6f} USDC")
+    df_display["amount1_eth"] = df["amount1_eth"].apply(lambda x: f"{x:,.6f} WETH")
+    df_display["volume_usd"] = df["volume_usd"].apply(lambda x: f"${x:,.2f}")
+    df_display["price"] = df["price"].apply(lambda x: f"${x:,.2f}")
+    
+    st.dataframe(df_display, use_container_width=True)
 
 with tab2:
     st.subheader("Price Impact vs Volume")
