@@ -54,17 +54,20 @@ def fetch_swaps_data(db_path: str, days: int = 7) -> pd.DataFrame:
     
     # Scale raw token amounts to human-readable values
     if not df.empty:
-        # WETH (token0) has 18 decimals
-        df["amount0_eth"] = df["amount0"].astype(float) / 1e18
+        # WETH (token0) has 18 decimals - scale and take absolute value
+        df["amount0_eth"] = (df["amount0"].astype(float) / 1e18).abs()
         
-        # USDC (token1) has 6 decimals
-        df["amount1_usdc"] = df["amount1"].astype(float) / 1e6
+        # USDC (token1) has 6 decimals - scale and take absolute value
+        df["amount1_usdc"] = (df["amount1"].astype(float) / 1e6).abs()
         
-        # Hotfix: Override volume_usd with the absolute USDC amount
-        df["volume_usd"] = df["amount1_usdc"].abs()
+        # Set volume_usd to the USDC amount (already absolute)
+        df["volume_usd"] = df["amount1_usdc"]
         
         # Initialize missing columns for compatibility with app.py
         df["price_impact_bps"] = None
         df["implied_density"] = None
+        
+        # Drop raw columns to avoid duplicates in Streamlit
+        df = df.drop(columns=["amount0", "amount1"], errors="ignore")
     
     return df
