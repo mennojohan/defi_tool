@@ -1,0 +1,15 @@
+# Core Dependencies
+streamlit>=1.28.0
+pandas>=2.0.0
+sqlalchemy>=2.0.0
+python-dotenv>=1.0.0
+web3>=6.0.0
+
+# Database
+sqlite3  # Built into Python
+
+# Optional (for PostgreSQL support)
+# psycopg2-binary>=2.9.0
+
+# Testing
+pytest>=7.4.0
