@@ -52,22 +52,20 @@ def fetch_swaps_data(db_path: str, days: int = 7) -> pd.DataFrame:
     with sqlite3.connect(db_path) as conn:
         df = pd.read_sql_query(query, conn)
     
-    # Scale raw token amounts to human-readable values
+    # Schaal de rauwe token hoeveelheden op basis van de terminal-analyse
     if not df.empty:
-        # WETH (token0) has 18 decimals - scale and take absolute value
-        df["amount0_eth"] = (df["amount0"].astype(float) / 1e18).abs()
+        # Harde mapping: amount0 = USDC (1e6), amount1 = WETH (1e18)
+        df["amount0_eth"] = (df["amount1"].astype(float) / 1e18).abs()   # haalt WETH uit amount1
+        df["amount1_usdc"] = (df["amount0"].astype(float) / 1e6).abs()   # haalt USDC uit amount0
         
-        # USDC (token1) has 6 decimals - scale and take absolute value
-        df["amount1_usdc"] = (df["amount1"].astype(float) / 1e6).abs()
-        
-        # Set volume_usd to the USDC amount (already absolute)
+        # Zet volume_usd direct gelijk aan het gecorrigeerde USDC bedrag
         df["volume_usd"] = df["amount1_usdc"]
         
-        # Initialize missing columns for compatibility with app.py
+        # Vul missende kolommen op met None voor compatibiliteit met app.py
         df["price_impact_bps"] = None
         df["implied_density"] = None
         
-        # Drop raw columns to avoid duplicates in Streamlit
+        # Verwijder de rauwe kolommen om duplicaten in de Streamlit tabel te voorkomen
         df = df.drop(columns=["amount0", "amount1"], errors="ignore")
     
     return df
