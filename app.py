@@ -51,8 +51,8 @@ tab1, tab2 = st.tabs(["Data", "Charts"])
 with tab1:
     # Format token amounts for display
     df_display = df.copy()
-    df_display["amount0_usdc"] = df["amount0_usdc"].apply(lambda x: f"{x:,.6f} USDC")
-    df_display["amount1_eth"] = df["amount1_eth"].apply(lambda x: f"{x:,.6f} WETH")
+    df_display["amount0_eth"] = df["amount0_eth"].apply(lambda x: f"{x:,.6f} WETH")
+    df_display["amount1_usdc"] = df["amount1_usdc"].apply(lambda x: f"{x:,.6f} USDC")
     df_display["volume_usd"] = df["volume_usd"].apply(lambda x: f"${x:,.2f}")
     df_display["price"] = df["price"].apply(lambda x: f"${x:,.2f}")
     
