@@ -588,34 +588,40 @@ class UniswapV3PoolListenerV3:
         try:
             current_price = swap_event["price"]
             
+            # Default values (avoid None)
+            price_impact_bps = Decimal("0")
+            implied_density = Decimal("0")
+            
             if self._last_price is not None and self._last_price > 0:
                 price_delta = abs(current_price - self._last_price)
                 price_impact_pct = price_delta / self._last_price
                 price_impact_bps = price_impact_pct * Decimal("10000")
                 
-                # Schat volume (simplified: abs(amount0) voor USDC side)
+                # Calculate volume_usd based on the non-zero token amount
                 # ⚠️ amount0 = USDC (6 decimals), amount1 = WETH (18 decimals)
-                volume = abs(swap_event["amount0"]) / Decimal("1e6")  # USDC heeft 6 decimals
+                if swap_event["amount0"] != 0:
+                    volume = abs(Decimal(str(swap_event["amount0"])) / Decimal("1e6"))  # USDC
+                elif swap_event["amount1"] != 0:
+                    volume = abs(Decimal(str(swap_event["amount1"])) / Decimal("1e18")) * current_price  # WETH
+                else:
+                    volume = Decimal("0")
                 
-                # Implied density (hoe hoger, hoe meer liquidity)
+                # Implied density (higher = more liquidity)
                 if price_impact_bps > 0:
                     implied_density = volume / price_impact_bps
                 else:
                     implied_density = Decimal("0")
-                
-                swap_event["price_impact_bps"] = price_impact_bps
-                swap_event["implied_density"] = implied_density
-            else:
-                swap_event["price_impact_bps"] = None
-                swap_event["implied_density"] = None
+            
+            swap_event["price_impact_bps"] = price_impact_bps
+            swap_event["implied_density"] = implied_density
             
             # Update last price
             self._last_price = current_price
             
         except Exception as e:
             logger.debug(f"Price impact berekening mislukt: {e}")
-            swap_event["price_impact_bps"] = None
-            swap_event["implied_density"] = None
+            swap_event["price_impact_bps"] = Decimal("0")
+            swap_event["implied_density"] = Decimal("0")
         
         return swap_event
     

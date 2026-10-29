@@ -38,9 +38,9 @@ def fetch_swaps_data(db_path: str, days: int = 7) -> pd.DataFrame:
         price,
         amount0 / 1e6 AS amount0_usdc,  # USDC (6 decimals)
         amount1 / 1e18 AS amount1_eth,  # WETH (18 decimals)
-        volume_usd,
-        price_impact_bps,
-        implied_density
+        COALESCE(volume_usd, 0) AS volume_usd,
+        COALESCE(price_impact_bps, 0) AS price_impact_bps,
+        COALESCE(implied_density, 0) AS implied_density
     FROM 
         swaps
     WHERE 
