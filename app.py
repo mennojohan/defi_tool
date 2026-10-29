@@ -32,6 +32,10 @@ def load_data(days: int) -> pd.DataFrame:
 
 df = load_data(days)
 
+# Hotfix: Override volume_usd with the absolute USDC amount (amount1_usdc)
+if not df.empty and "amount1_usdc" in df.columns:
+    df["volume_usd"] = df["amount1_usdc"].abs()
+
 # Apply filters
 if min_volume > 0:
     df = df[df["volume_usd"] >= min_volume]
@@ -49,10 +53,15 @@ col4.metric("Current Price (USD)", f"${df['price'].iloc[0]:,.2f}")
 tab1, tab2 = st.tabs(["Data", "Charts"])
 
 with tab1:
-    # Format token amounts for display
+    # Format token amounts for display (use columns from fetch_swaps.py)
     df_display = df.copy()
-    df_display["amount0_eth"] = df["amount0_eth"].apply(lambda x: f"{x:,.6f} WETH")
-    df_display["amount1_usdc"] = df["amount1_usdc"].apply(lambda x: f"{x:,.6f} USDC")
+    
+    # Check available columns and format accordingly
+    if "amount0_eth" in df.columns:
+        df_display["amount0_eth"] = df["amount0_eth"].apply(lambda x: f"{x:,.6f} WETH")
+    if "amount1_usdc" in df.columns:
+        df_display["amount1_usdc"] = df["amount1_usdc"].apply(lambda x: f"{x:,.6f} USDC")
+    
     df_display["volume_usd"] = df["volume_usd"].apply(lambda x: f"${x:,.2f}")
     df_display["price"] = df["price"].apply(lambda x: f"${x:,.2f}")
     
