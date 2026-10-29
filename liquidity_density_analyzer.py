@@ -225,11 +225,12 @@ class LiquidityDensityAnalyzer:
                 amount1 = getattr(swap, 'amount1', None)
             
             # Bereken volume_usd als het NULL of 0 is
+            # ⚠️ amount0 = USDC (6 decimals), amount1 = WETH (18 decimals)
             if volume is None or volume == 0:
                 if amount0 and price:
-                    volume = abs(Decimal(str(amount0)) / Decimal("1e18")) * price
+                    volume = abs(Decimal(str(amount0)) / Decimal("1e6"))  # USDC
                 elif amount1 and price:
-                    volume = abs(Decimal(str(amount1)) / Decimal("1e6"))
+                    volume = abs(Decimal(str(amount1)) / Decimal("1e18")) * price  # WETH
                 else:
                     volume = Decimal("1000.00")  # Fallback value
 

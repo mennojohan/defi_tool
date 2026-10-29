@@ -75,23 +75,23 @@ def test_volume_usd():
     
     test_cases = [
         {
-            "name": "Tiny Swap (0.1 WETH)",
-            "amount0": Decimal("100000000000000000"),  # 0.1 WETH (18 decimals)
-            "amount1": Decimal("250100000"),  # 250.1 USDC (6 decimals)
+            "name": "Tiny Swap (250.1 USDC)",
+            "amount0": Decimal("250100000"),  # 250.1 USDC (6 decimals)
+            "amount1": Decimal("100000000000000000"),  # 0.1 WETH (18 decimals)
             "price": Decimal("2501"),  # WETH price in USD
             "expected_volume": Decimal("250.10"),
         },
         {
-            "name": "Massive Swap (10 WETH)",
-            "amount0": Decimal("10000000000000000000"),  # 10 WETH (18 decimals)
-            "amount1": Decimal("25500000000"),  # 25500 USDC (6 decimals)
+            "name": "Massive Swap (25,500 USDC)",
+            "amount0": Decimal("25500000000"),  # 25,500 USDC (6 decimals)
+            "amount1": Decimal("10000000000000000000"),  # 10 WETH (18 decimals)
             "price": Decimal("2550"),  # WETH price in USD
             "expected_volume": Decimal("25500.00"),
         },
         {
-            "name": "USDC Only (No WETH)",
-            "amount0": None,
-            "amount1": Decimal("1000000"),  # 1 USDC (6 decimals)
+            "name": "USDC Only (1 USDC)",
+            "amount0": Decimal("1000000"),  # 1 USDC (6 decimals)
+            "amount1": None,
             "price": Decimal("2500"),
             "expected_volume": Decimal("1.00"),
         },
@@ -106,17 +106,17 @@ def test_volume_usd():
     
     for case in test_cases:
         # Simulate the logic in `update_volume_usd.py`
-        if case["amount0"] is not None and case["amount0"] > 0 and case["price"]:
-            volume_usd = abs(Decimal(str(case["amount0"])) / Decimal("1e18")) * case["price"]
-        elif case["amount1"] is not None and case["amount1"] > 0:
-            volume_usd = abs(Decimal(str(case["amount1"])) / Decimal("1e6"))
+        if case["amount0"] is not None and case["amount0"] > 0:
+            volume_usd = abs(Decimal(str(case["amount0"])) / Decimal("1e6"))  # USDC
+        elif case["amount1"] is not None and case["amount1"] > 0 and case["price"]:
+            volume_usd = abs(Decimal(str(case["amount1"])) / Decimal("1e18")) * case["price"]  # WETH
         else:
             volume_usd = Decimal("0")
         
         status = "✅ PASS" if volume_usd == case["expected_volume"] else "❌ FAIL"
         print(f"\n{case['name']}")
-        print(f"  Amount0 (WETH): {case['amount0']}")
-        print(f"  Amount1 (USDC): {case['amount1']}")
+        print(f"  Amount0 (USDC): {case['amount0']}")
+        print(f"  Amount1 (WETH): {case['amount1']}")
         print(f"  Price: ${case['price']}")
         print(f"  Expected: ${case['expected_volume']}")
         print(f"  Actual: ${volume_usd}")

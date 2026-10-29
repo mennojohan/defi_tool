@@ -551,19 +551,19 @@ class UniswapV3PoolListenerV3:
                 if tick >= 2**23:
                     tick -= 2**24
                 
-                # Bereken prijs
+                # Bereken prijs (invert=True omdat token0=USDC, token1=WETH)
                 price = sqrt_price_x96_to_price(sqrt_price_x96, invert=True)
                 
                 return {
                     "tx_hash": tx_hash,
                     "block_number": block_number,
                     "log_index": log_index,
-                    "transaction_index": tx_index,  # 🆕
+                    "transaction_index": tx_index,
                     "timestamp": dt,
                     "sender": sender,
                     "recipient": recipient,
-                    "amount0": amount0,
-                    "amount1": amount1,
+                    "amount0": amount0,  # USDC (6 decimals)
+                    "amount1": amount1,  # WETH (18 decimals)
                     "sqrt_price_x96": sqrt_price_x96,
                     "liquidity": liquidity,
                     "tick": tick,
@@ -593,8 +593,9 @@ class UniswapV3PoolListenerV3:
                 price_impact_pct = price_delta / self._last_price
                 price_impact_bps = price_impact_pct * Decimal("10000")
                 
-                # Schat volume (simplified: abs(amount1) voor USDC side)
-                volume = abs(swap_event["amount1"]) / Decimal("1e6")  # USDC heeft 6 decimals
+                # Schat volume (simplified: abs(amount0) voor USDC side)
+                # ⚠️ amount0 = USDC (6 decimals), amount1 = WETH (18 decimals)
+                volume = abs(swap_event["amount0"]) / Decimal("1e6")  # USDC heeft 6 decimals
                 
                 # Implied density (hoe hoger, hoe meer liquidity)
                 if price_impact_bps > 0:
